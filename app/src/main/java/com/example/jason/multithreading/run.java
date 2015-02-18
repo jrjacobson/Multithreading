@@ -18,7 +18,10 @@ import java.util.ArrayList;
 
 
 public class run extends ActionBarActivity {
-    String FILE_NAME = "numberFile";
+    private ListView listView;
+    private ArrayAdapter<String> listAdapter;
+    private String FILE_NAME = "numberFile";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,9 +72,8 @@ public class run extends ActionBarActivity {
     public void loadFile(View view) {
         String filename = FILE_NAME;
         String line;
-        ListView listView = (ListView) findViewById(R.id.listView);
         ArrayList<String> numbers = new ArrayList<>();
-        ArrayAdapter<String> listAdapter;
+        listView = (ListView) findViewById(R.id.listView);
 
         try {
             FileInputStream inputStream = this.openFileInput(filename);
@@ -84,5 +86,10 @@ public class run extends ActionBarActivity {
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void clear(View view) {
+        listAdapter.clear();
+        listView.setAdapter(listAdapter);
     }
 }
