@@ -1,6 +1,7 @@
 package com.example.jason.multithreading;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,6 +23,9 @@ public class run extends ActionBarActivity {
     private ListView listView;
     private ArrayAdapter<String> listAdapter;
     private String FILE_NAME = "numberFile";
+    private ProgressBar progressBar;
+    private int progress = 0;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,20 +59,40 @@ public class run extends ActionBarActivity {
     public void createFile(View view){
         String filename = FILE_NAME;
         new File(this.getFilesDir(), filename);
-        FileOutputStream outputStream;
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String filename = FILE_NAME;
+                FileOutputStream outputStream;
 
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            for(int x = 1; x < 11; x++){
-                String output = x + "\n";
-                outputStream.write(output.getBytes());
+                try {
+                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+
+                    for(int x = 1; x < 11; x++){
+                        String output = x + "\n";
+                        progress = progress + 10;
+                        outputStream.write(output.getBytes());
+                        try {
+                            Thread.sleep(250);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setProgress(progress);
+                            }
+                        });
+                    }
+                    outputStream.close();
+                } catch (java.io.IOException e) {
+                    e.printStackTrace();
+                }
             }
-            outputStream.close();
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
-    }
+        }).start();
 
+    }
 
     public void loadFile(View view) {
         String filename = FILE_NAME;
@@ -89,6 +114,8 @@ public class run extends ActionBarActivity {
     }
 
     public void clear(View view) {
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        progressBar.setProgress(0);
         listAdapter.clear();
         listView.setAdapter(listAdapter);
     }
