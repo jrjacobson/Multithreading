@@ -12,7 +12,6 @@ import android.widget.ListView;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -69,20 +68,18 @@ public class run extends ActionBarActivity {
 
     public void loadFile(View view) {
         String filename = FILE_NAME;
-        String line = null;
+        String line;
         ListView listView = (ListView) findViewById(R.id.listView);
         ArrayList<String> numbers = new ArrayList<>();
         ArrayAdapter<String> listAdapter;
-        int count = 0;
 
         try {
             FileInputStream inputStream = this.openFileInput(filename);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             while ((line = reader.readLine()) != null){
                 numbers.add(line);
-                count++;
             }
-            listAdapter = new ArrayAdapter<String>(this, R.layout.simplerow, numbers);
+            listAdapter = new ArrayAdapter<>(this, R.layout.simplerow, numbers);
             listView.setAdapter(listAdapter);
         } catch (java.io.IOException e) {
             e.printStackTrace();
