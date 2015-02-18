@@ -26,6 +26,7 @@ public class run extends ActionBarActivity {
     private ProgressBar progressBar;
     private int progress = 0;
     private Handler handler = new Handler();
+    private ArrayList<String> numbers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +59,7 @@ public class run extends ActionBarActivity {
 
     public void createFile(View view){
         String filename = FILE_NAME;
+        progress = 0;
         new File(this.getFilesDir(), filename);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         new Thread(new Runnable() {
@@ -95,22 +97,43 @@ public class run extends ActionBarActivity {
     }
 
     public void loadFile(View view) {
-        String filename = FILE_NAME;
-        String line;
-        ArrayList<String> numbers = new ArrayList<>();
+        progressBar.setProgress(0);
+        progress = 0;
         listView = (ListView) findViewById(R.id.listView);
+        numbers.clear();
 
-        try {
-            FileInputStream inputStream = this.openFileInput(filename);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            while ((line = reader.readLine()) != null){
-                numbers.add(line);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String filename = FILE_NAME;
+                String line;
+
+                try {
+                    FileInputStream inputStream = openFileInput(filename);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                    while ((line = reader.readLine()) != null){
+                        numbers.add(line);
+                        try {
+                            Thread.sleep(250);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        progress = progress + 10;
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setProgress(progress);
+                            }
+                        });
+                    }
+
+                } catch (java.io.IOException e) {
+                    e.printStackTrace();
+                }
             }
-            listAdapter = new ArrayAdapter<>(this, R.layout.simplerow, numbers);
-            listView.setAdapter(listAdapter);
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
-        }
+        }).start();
+        listAdapter = new ArrayAdapter<>(this, R.layout.simplerow, numbers);
+        listView.setAdapter(listAdapter);
     }
 
     public void clear(View view) {
