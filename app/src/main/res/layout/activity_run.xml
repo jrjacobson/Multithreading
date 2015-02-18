@@ -15,19 +15,11 @@
         android:layout_alignParentEnd="true"
         android:indeterminate="false" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Medium Text"
-        android:id="@+id/textView"
-        android:layout_below="@+id/progressBar"
-        android:layout_centerHorizontal="true" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="CREATE"
+        android:onClick="createFile"
         android:id="@+id/createButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true" />
@@ -38,7 +30,8 @@
         android:text="LOAD"
         android:id="@+id/loadButton"
         android:layout_alignBottom="@+id/createButton"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="loadFile"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -47,5 +40,12 @@
         android:id="@+id/clearButton"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_below="@+id/progressBar"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
