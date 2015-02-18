@@ -58,11 +58,9 @@ public class run extends ActionBarActivity {
 
         try {
             outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            for(int x = 1; x < 11; x++){
-                String output = x + "\n";
-                outputStream.write(output.getBytes());
-            }
-            outputStream.close();
+            saveThread save = new saveThread(outputStream);
+            Thread saveThread = new Thread(save);
+            saveThread.run();
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
