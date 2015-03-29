@@ -1,32 +1,22 @@
 package com.example.jason.multithreading;
 
 import android.content.Context;
-import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-
 public class run extends ActionBarActivity {
-    private ListView listView;
-    private ArrayAdapter<String> listAdapter;
-    private String FILE_NAME = "numberFile";
-    private ProgressBar progressBar;
-    private int progress = 0;
-    private Handler handler = new Handler();
-    private ArrayList<String> numbers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,112 +24,202 @@ public class run extends ActionBarActivity {
         setContentView(R.layout.activity_run);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_run, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public void createFile(View view){
-        String filename = FILE_NAME;
-        progress = 0;
-        new File(this.getFilesDir(), filename);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        new Thread(new Runnable() {
+    public void create(View view) {
+
+        AsyncTask<Object, Integer, String> task = new AsyncTask<Object, Integer, String>() {
+
             @Override
-            public void run() {
-                String filename = FILE_NAME;
-                FileOutputStream outputStream;
+            protected String doInBackground(Object... params) {
 
                 try {
+                    String filename = "numbers.txt";
+                    FileOutputStream outputStream;
+
                     outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
 
-                    for(int x = 1; x < 11; x++){
-                        String output = x + "\n";
-                        progress = progress + 10;
-                        outputStream.write(output.getBytes());
-                        try {
-                            Thread.sleep(250);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setProgress(progress);
-                            }
-                        });
+                    for (int i = 1; i <= 10; ++i) {
+                        outputStream.write(i);
+                        Thread.sleep(250);
+                        publishProgress(i);
                     }
+
                     outputStream.close();
-                } catch (java.io.IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+                return "Completed";
             }
-        }).start();
 
-    }
-
-    public void loadFile(View view) {
-        progressBar.setProgress(0);
-        progress = 0;
-        listView = (ListView) findViewById(R.id.listView);
-        numbers.clear();
-
-        new Thread(new Runnable() {
             @Override
-            public void run() {
-                String filename = FILE_NAME;
-                String line;
+            protected void onProgressUpdate(Integer... in) {
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                progressBar.setProgress(in[0]);
 
-                try {
-                    FileInputStream inputStream = openFileInput(filename);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    while ((line = reader.readLine()) != null){
-                        numbers.add(line);
-                        try {
-                            Thread.sleep(250);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        progress = progress + 10;
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setProgress(progress);
-                            }
-                        });
-                    }
-
-                } catch (java.io.IOException e) {
-                    e.printStackTrace();
-                }
             }
-        }).start();
-        listAdapter = new ArrayAdapter<>(this, R.layout.simplerow, numbers);
-        listView.setAdapter(listAdapter);
+            @Override
+            protected void onPreExecute() {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(false);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(false);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(false);
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(true);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(true);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(true);
+            }
+        };
+
+        task.execute();
+
     }
 
-    public void clear(View view) {
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        progressBar.setProgress(0);
-        listAdapter.clear();
-        listView.setAdapter(listAdapter);
+    public void load (View view) {
+
+        AsyncTask<Object, Integer, ArrayList<String>> task = new AsyncTask<Object, Integer,
+                ArrayList<String>>() {
+
+            @Override
+            protected ArrayList<String> doInBackground(Object... params) {
+                ArrayList<String> result = new ArrayList<>();
+                try {
+                    String filename = "numbers.txt";
+                    FileInputStream inputStream;
+                    inputStream = openFileInput(filename);
+                    for (int i = 1; i <= 10; ++i) {
+                        result.add(String.valueOf(inputStream.read()));
+                        Thread.sleep(250);
+                        publishProgress(i);
+                    }
+                    inputStream.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return result;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... in) {
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                progressBar.setProgress(in[0]);
+            }
+
+            @Override
+            protected void onPreExecute() {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(false);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(false);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(false);
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<String> result) {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(true);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(true);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(true);
+
+                // fill the ListView
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<String>(run.this, android.R.layout.simple_list_item_1,
+                                result);
+                ListView listView = (ListView) findViewById(R.id.listView);
+                listView.setAdapter(adapter);
+            }
+        };
+        task.execute();
+    }
+
+    public void clear (View view) {
+
+        AsyncTask<Object, Integer, ArrayList<String>> task = new AsyncTask<Object, Integer,
+                ArrayList<String>>() {
+
+            @Override
+            protected ArrayList<String> doInBackground(Object... params) {
+                ArrayList<String> result = new ArrayList<>();
+                publishProgress(0);
+                return result;
+            }
+
+            @Override
+            protected void onProgressUpdate(Integer... in) {
+                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                progressBar.setProgress(in[0]);
+
+            }
+
+            @Override
+            protected void onPreExecute() {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(false);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(false);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(false);
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<String> result) {
+                // create button
+                Button create = (Button) findViewById(R.id.create);
+                create.setEnabled(true);
+                // load button
+                Button load = (Button) findViewById(R.id.load);
+                load.setEnabled(true);
+                // clear button
+                Button clear = (Button) findViewById(R.id.clear);
+                clear.setEnabled(true);
+
+                // fill the ListView
+                ArrayAdapter<String> adapter =
+                        new ArrayAdapter<String>(run.this, android.R.layout.simple_list_item_1,
+                                result);
+                ListView listView = (ListView) findViewById(R.id.listView);
+                listView.setAdapter(adapter);
+            }
+        };
+        task.execute();
     }
 }
