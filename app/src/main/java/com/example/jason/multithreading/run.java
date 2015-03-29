@@ -33,10 +33,7 @@ public class run extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     public void create(View view) {
@@ -158,9 +155,8 @@ public class run extends ActionBarActivity {
                 clear.setEnabled(true);
 
                 // fill the ListView
-                ArrayAdapter<String> adapter =
-                        new ArrayAdapter<String>(run.this, android.R.layout.simple_list_item_1,
-                                result);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                        (run.this, android.R.layout.simple_list_item_1, result);
                 ListView listView = (ListView) findViewById(R.id.listView);
                 listView.setAdapter(adapter);
             }
